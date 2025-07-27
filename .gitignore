@@ -175,3 +175,6 @@ uv.lock
 # Development planning documents (do not track in git)
 プラン.md
 要件.md
+
+# Docker installation documents (environment-specific)
+DOCKER_INSTALL.md
