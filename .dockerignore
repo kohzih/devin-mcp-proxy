@@ -35,9 +35,11 @@ logs/
 .env
 
 # Documentation and development files
-*.md
+# Exclude development planning documents
 プラン.md
 要件.md
+
+# Essential documentation (README.md, DOCKER.md, CLAUDE.md) are included by default
 
 # Build artifacts
 dist/

@@ -171,3 +171,7 @@ uv.lock
 .env.staging
 *.key
 *.pem
+
+# Development planning documents (do not track in git)
+プラン.md
+要件.md
