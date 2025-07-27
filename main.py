@@ -1,8 +1,9 @@
 import os
-import json
-import requests
+import asyncio
 from fastmcp import FastMCP
 from dotenv import load_dotenv
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.sse import sse_client
 
 # 環境変数を読み込み
 load_dotenv()
@@ -18,8 +19,33 @@ REPO_NAME = "smartfnexta/pms"
 if not DEVIN_API_KEY:
     raise ValueError("DEVIN_API_KEY environment variable is required")
 
+async def call_devin_mcp(question: str) -> str:
+    """
+    Devin MCP APIを正しい方法で呼び出す非同期関数
+    """
+    server_url = f"{DEVIN_API_BASE_URL}/sse"
+    headers = {"Authorization": f"Bearer {DEVIN_API_KEY}"}
+    
+    try:
+        async with sse_client(server_url, headers=headers) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                
+                result = await session.call_tool(
+                    "ask_question",
+                    arguments={
+                        "repoName": REPO_NAME,
+                        "question": question
+                    }
+                )
+                
+                return str(result.content[0].text) if result.content else "No response from Devin MCP"
+                
+    except Exception as e:
+        return f"Error: {str(e)}"
+
 @mcp.tool()
-def ask_question(question: str) -> str:
+async def ask_question(question: str) -> str:
     """
     Devin MCPのask_questionツールを呼び出してリポジトリに関する質問に回答します。
     
@@ -30,47 +56,8 @@ def ask_question(question: str) -> str:
         Devin MCPからの回答
     """
     try:
-        # Devin MCP APIへのリクエスト準備
-        url = f"{DEVIN_API_BASE_URL}/sse"
-        headers = {
-            "Authorization": f"Bearer {DEVIN_API_KEY}",
-            "Content-Type": "application/json"
-        }
-        
-        # リクエストボディを作成
-        payload = {
-            "mcp_sse_call_tool": {
-                "arguments": json.dumps({
-                    "repoName": REPO_NAME,
-                    "question": question
-                }),
-                "tool_name": "ask_question"
-            }
-        }
-        
-        # Devin MCP APIを呼び出し
-        response = requests.post(url, headers=headers, json=payload, timeout=30)
-        
-        # レスポンスをチェック
-        if response.status_code == 200:
-            return response.text
-        elif response.status_code == 401:
-            return "Error: Invalid API key. Please check your DEVIN_API_KEY."
-        elif response.status_code == 403:
-            return "Error: Access forbidden. Please check your permissions."
-        elif response.status_code == 404:
-            return f"Error: Repository '{REPO_NAME}' not found."
-        else:
-            return f"Error: API request failed with status {response.status_code}: {response.text}"
-            
-    except requests.exceptions.Timeout:
-        return "Error: Request timed out. Please try again later."
-    except requests.exceptions.ConnectionError:
-        return "Error: Unable to connect to Devin MCP API. Please check your internet connection."
-    except requests.exceptions.RequestException as e:
-        return f"Error: Request failed: {str(e)}"
-    except json.JSONDecodeError as e:
-        return f"Error: Invalid JSON in request: {str(e)}"
+        # 直接非同期関数を呼び出し
+        return await call_devin_mcp(question)
     except Exception as e:
         return f"Error: Unexpected error occurred: {str(e)}"
 
