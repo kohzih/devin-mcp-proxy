@@ -176,5 +176,6 @@ uv.lock
 プラン.md
 要件.md
 
-# Docker installation documents (environment-specific)
+# Docker installation documents (environment-specific)  
 DOCKER_INSTALL.md
+# scripts/install_docker.sh - include installation script in git
