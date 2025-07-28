@@ -179,3 +179,4 @@ uv.lock
 # Docker installation documents (environment-specific)  
 DOCKER_INSTALL.md
 # scripts/install_docker.sh - include installation script in git
+コンテナ間通信設定手順書.md

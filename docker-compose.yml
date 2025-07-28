@@ -1,4 +1,4 @@
-version: '3.9'
+# version: '3.9'  # 削除（Docker Compose v2では不要）
 
 services:
   devin-mcp-proxy:
@@ -28,7 +28,7 @@ services:
 
 networks:
   dify-mcp-shared:
-    driver: bridge
+    external: true
     name: dify-mcp-shared
 
 # Optional: for production with persistent volumes
