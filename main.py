@@ -67,4 +67,4 @@ if __name__ == "__main__":
     print(f"API endpoint: {DEVIN_API_BASE_URL}")
     
     # SSEトランスポートでサーバーを起動
-    mcp.run(transport="sse")
+    mcp.run(transport="sse", host="0.0.0.0", port=8000)
