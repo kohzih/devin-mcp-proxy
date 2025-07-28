@@ -61,32 +61,31 @@ async def ask_question(question: str) -> str:
     except Exception as e:
         return f"Error: Unexpected error occurred: {str(e)}"
 
-# ヘルスチェック用のリソース
-@mcp.resource("health")
-async def health_check():
+# ヘルスチェック用のツール
+@mcp.tool()
+async def health_status() -> str:
     """
-    ヘルスチェック用リソース
-    Difyとの連携やDocker healthcheckで使用
+    サーバーのヘルスステータスを確認します
+    
+    Returns:
+        サーバーの状態情報（JSON形式の文字列）
     """
     try:
         # 基本的なサーバー状態チェック
         if not DEVIN_API_KEY:
-            return {
-                "status": "unhealthy",
-                "error": "DEVIN_API_KEY not configured"
-            }
+            return '{"status": "unhealthy", "error": "DEVIN_API_KEY not configured"}'
         
-        return {
+        status = {
             "status": "healthy",
             "service": "devin-mcp-proxy", 
             "version": "1.0.0",
             "repo": REPO_NAME
         }
+        
+        import json
+        return json.dumps(status)
     except Exception as e:
-        return {
-            "status": "unhealthy",
-            "error": f"Service unhealthy: {str(e)}"
-        }
+        return f'{{"status": "unhealthy", "error": "Service unhealthy: {str(e)}"}}'
 
 if __name__ == "__main__":
     print(f"Starting Devin Proxy MCP Server...")
