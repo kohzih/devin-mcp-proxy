@@ -1,18 +1,18 @@
-version: '3.8'
+version: '3.9'
 
 services:
   devin-mcp-proxy:
     build: .
     container_name: devin-mcp-proxy
     ports:
-      - "8000:8000"
+      - "8888:8000"  # 外部ポートを8888に変更（競合回避）
     environment:
       - DEVIN_API_KEY=${DEVIN_API_KEY}
     env_file:
       - .env
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://127.0.0.1:8000', timeout=5)"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -21,14 +21,15 @@ services:
       # Optional: mount logs directory
       - ./logs:/app/logs:rw
     networks:
-      - mcp-network
+      - dify-mcp-shared
     labels:
       - "com.docker.compose.project=devin-mcp-proxy"
       - "com.docker.compose.service=devin-mcp-proxy"
 
 networks:
-  mcp-network:
+  dify-mcp-shared:
     driver: bridge
+    name: dify-mcp-shared
 
 # Optional: for production with persistent volumes
 # volumes:
