@@ -61,32 +61,32 @@ async def ask_question(question: str) -> str:
     except Exception as e:
         return f"Error: Unexpected error occurred: {str(e)}"
 
-# ヘルスチェック用のHTTPエンドポイント
-from fastapi import HTTPException
-from fastapi.responses import JSONResponse
-
-@mcp.get("/health")
+# ヘルスチェック用のリソース
+@mcp.resource("health")
 async def health_check():
     """
-    ヘルスチェック用エンドポイント
+    ヘルスチェック用リソース
     Difyとの連携やDocker healthcheckで使用
     """
     try:
         # 基本的なサーバー状態チェック
         if not DEVIN_API_KEY:
-            raise HTTPException(status_code=503, detail="DEVIN_API_KEY not configured")
-        
-        return JSONResponse(
-            status_code=200,
-            content={
-                "status": "healthy",
-                "service": "devin-mcp-proxy",
-                "version": "1.0.0",
-                "repo": REPO_NAME
+            return {
+                "status": "unhealthy",
+                "error": "DEVIN_API_KEY not configured"
             }
-        )
+        
+        return {
+            "status": "healthy",
+            "service": "devin-mcp-proxy", 
+            "version": "1.0.0",
+            "repo": REPO_NAME
+        }
     except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Service unhealthy: {str(e)}")
+        return {
+            "status": "unhealthy",
+            "error": f"Service unhealthy: {str(e)}"
+        }
 
 if __name__ == "__main__":
     print(f"Starting Devin Proxy MCP Server...")
